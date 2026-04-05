@@ -14,11 +14,12 @@ interface HeatmapTile {
 }
 
 function deriveHeatmap(holdings: Holding[]): HeatmapTile[] {
+    if (!Array.isArray(holdings)) return []
     return holdings.map((h) => {
-        const cv = h.current_value ?? h.quantity * (h.ltp ?? h.avg_cost)
-        const pnlPct = h.pnl_percent ?? 0
+        const cv = h?.current_value ?? (h?.quantity ?? 0) * (h?.ltp ?? h?.avg_cost ?? 0)
+        const pnlPct = h?.pnl_percent ?? 0
         return {
-            name: h.instrument?.symbol ?? "?",
+            name: h?.instrument?.symbol ?? "?",
             value: Math.max(cv, 100), // Treemap needs positive values
             change: Math.round(pnlPct * 10) / 10,
             color: pnlPct >= 0 ? "var(--profit-primary)" : "var(--loss-primary)",

@@ -14,11 +14,13 @@ interface SectorSlice {
 }
 
 function deriveSectors(holdings: Holding[]): SectorSlice[] {
+    if (!Array.isArray(holdings)) return []
     const groups: Record<string, number> = {}
 
     for (const h of holdings) {
-        const sector = h.instrument?.sector || "Other"
-        const value = h.current_value ?? h.quantity * (h.ltp ?? h.avg_cost)
+        if (!h) continue;
+        const sector = h?.instrument?.sector || "Other"
+        const value = h?.current_value ?? (h?.quantity ?? 0) * (h?.ltp ?? h?.avg_cost ?? 0)
         groups[sector] = (groups[sector] ?? 0) + value
     }
 

@@ -46,10 +46,10 @@ export default function AccountValueCurve() {
             .finally(() => setLoading(false))
     }, [selectedPeriod])
 
-    const chartData = snapshots.map((s) => ({
-        date: new Date(s.snapshot_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }),
-        value: s.total_value,
-        benchmark: s.total_invested ?? 0,
+    const chartData = (Array.isArray(snapshots) ? snapshots : []).map((s) => ({
+        date: s?.snapshot_date ? new Date(s.snapshot_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : "N/A",
+        value: s?.total_value ?? 0,
+        benchmark: s?.total_invested ?? 0,
     }))
 
     const currentValue = summary?.current_value ?? 0

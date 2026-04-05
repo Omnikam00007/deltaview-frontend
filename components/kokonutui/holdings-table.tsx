@@ -38,17 +38,17 @@ const generateSparkline = (start: number, end: number) => {
 }
 
 function mapHoldingToRow(h: HoldingType, totalValue: number): HoldingRow {
-    const qty = h.quantity ?? 0
-    const avg = h.avg_cost ?? 0
-    const ltp = h.ltp ?? avg
-    const cv = h.current_value ?? qty * ltp
-    const pnl = h.pnl ?? cv - qty * avg
-    const pnlPct = h.pnl_percent ?? (qty * avg > 0 ? (pnl / (qty * avg)) * 100 : 0)
+    const qty = h?.quantity ?? 0
+    const avg = h?.avg_cost ?? 0
+    const ltp = h?.ltp ?? avg
+    const cv = h?.current_value ?? qty * ltp
+    const pnl = h?.pnl ?? cv - qty * avg
+    const pnlPct = h?.pnl_percent ?? (qty * avg > 0 ? (pnl / (qty * avg)) * 100 : 0)
 
     return {
-        id: h.id,
-        symbol: h.instrument?.symbol ?? "UNKNOWN",
-        sector: h.instrument?.sector ?? "—",
+        id: h?.id ?? `unknown-${Math.random()}`,
+        symbol: h?.instrument?.symbol ?? "UNKNOWN",
+        sector: h?.instrument?.sector ?? "—",
         quantity: qty,
         avgCost: avg,
         ltp,
@@ -57,11 +57,11 @@ function mapHoldingToRow(h: HoldingType, totalValue: number): HoldingRow {
         pnlPercent: pnlPct,
         dayChangePercent: 0, // Will come from live price feed
         allocation: totalValue > 0 ? (cv / totalValue) * 100 : 0,
-        brokers: h.broker_account ? [h.broker_account.broker] : [],
-        brokerBreakdown: h.broker_account
+        brokers: h?.broker_account?.broker ? [h.broker_account.broker] : [],
+        brokerBreakdown: h?.broker_account?.broker
             ? [{ broker: h.broker_account.broker, qty, avgCost: avg }]
             : [],
-        isin: h.instrument?.isin ?? "",
+        isin: h?.instrument?.isin ?? "",
         sparkline: generateSparkline(avg, ltp),
     }
 }
@@ -97,8 +97,8 @@ export default function HoldingsTable() {
     const [showAddTrade, setShowAddTrade] = useState(false)
 
     useEffect(() => {
-        if (rawHoldings) {
-            const totalValue = rawHoldings.reduce((s, h) => s + (h.current_value ?? h.quantity * (h.ltp ?? h.avg_cost)), 0)
+        if (Array.isArray(rawHoldings)) {
+            const totalValue = rawHoldings.reduce((s, h) => s + (h?.current_value ?? ((h?.quantity ?? 0) * (h?.ltp ?? h?.avg_cost ?? 0))), 0)
             setHoldings(rawHoldings.map((h) => mapHoldingToRow(h, totalValue)))
         }
     }, [rawHoldings])

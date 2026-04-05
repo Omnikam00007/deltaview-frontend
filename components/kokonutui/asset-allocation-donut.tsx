@@ -26,12 +26,14 @@ const SEGMENT_COLORS: Record<string, string> = {
 }
 
 function deriveAllocation(holdings: Holding[]): AllocationSlice[] {
+    if (!Array.isArray(holdings)) return []
     const groups: Record<string, { value: number; count: number }> = {}
 
     for (const h of holdings) {
-        const segment = h.instrument?.segment || h.instrument?.exchange || "Other"
+        if (!h) continue;
+        const segment = h?.instrument?.segment || h?.instrument?.exchange || "Other"
         if (!groups[segment]) groups[segment] = { value: 0, count: 0 }
-        groups[segment].value += h.current_value ?? h.quantity * (h.ltp ?? h.avg_cost)
+        groups[segment].value += h?.current_value ?? (h?.quantity ?? 0) * (h?.ltp ?? h?.avg_cost ?? 0)
         groups[segment].count++
     }
 
