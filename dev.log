@@ -1,0 +1,100 @@
+
+> deltaview@0.1.0 dev
+> next dev
+
+ ⚠ Port 3000 is in use, trying 3001 instead.
+   ▲ Next.js 15.2.6
+   - Local:        http://localhost:3001
+   - Network:      http://192.168.1.119:3001
+
+ ✓ Starting...
+ ✓ Ready in 10.2s
+ ○ Compiling / ...
+ ✓ Compiled / in 14.4s (1570 modules)
+ GET / 200 in 16627ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 8.7s (1565 modules)
+ GET /api/placeholder/1200/600 404 in 7197ms
+ ✓ Compiled in 1422ms (744 modules)
+ ✓ Compiled in 802ms (744 modules)
+ ✓ Compiled in 745ms (744 modules)
+ ✓ Compiled in 874ms (744 modules)
+ ✓ Compiled in 937ms (744 modules)
+ ✓ Compiled in 705ms (744 modules)
+ ✓ Compiled in 725ms (744 modules)
+ ✓ Compiled in 832ms (744 modules)
+ ✓ Compiled in 802ms (744 modules)
+ ✓ Compiled in 718ms (744 modules)
+ ✓ Compiled in 897ms (744 modules)
+ ✓ Compiled in 943ms (744 modules)
+ ✓ Compiled in 933ms (744 modules)
+ ✓ Compiled in 956ms (744 modules)
+ ✓ Compiled in 778ms (744 modules)
+ ✓ Compiled in 843ms (744 modules)
+ ✓ Compiled in 957ms (744 modules)
+ ✓ Compiled in 1046ms (744 modules)
+ ✓ Compiled in 915ms (744 modules)
+ ✓ Compiled in 1074ms (744 modules)
+ ✓ Compiled in 1075ms (744 modules)
+ ✓ Compiled in 863ms (744 modules)
+ ✓ Compiled in 775ms (744 modules)
+ ✓ Compiled in 958ms (744 modules)
+ ✓ Compiled in 832ms (744 modules)
+ ✓ Compiled in 809ms (744 modules)
+ ✓ Compiled in 760ms (744 modules)
+ ✓ Compiled in 736ms (744 modules)
+ ✓ Compiled in 684ms (744 modules)
+ ✓ Compiled in 741ms (744 modules)
+ ✓ Compiled in 806ms (744 modules)
+ ✓ Compiled in 781ms (744 modules)
+ ✓ Compiled in 879ms (744 modules)
+ ✓ Compiled in 737ms (744 modules)
+ ✓ Compiled in 849ms (744 modules)
+ ✓ Compiled in 704ms (744 modules)
+ ✓ Compiled in 849ms (744 modules)
+ ✓ Compiled in 761ms (744 modules)
+ ✓ Compiled in 847ms (744 modules)
+ ✓ Compiled in 1016ms (744 modules)
+ ✓ Compiled in 1190ms (744 modules)
+ ✓ Compiled in 1867ms (744 modules)
+ ✓ Compiled in 4s (744 modules)
+ ✓ Compiled in 4.5s (744 modules)
+ ✓ Compiled in 6.1s (744 modules)
+ ✓ Compiled in 2.1s (744 modules)
+ ✓ Compiled in 1718ms (744 modules)
+[?25h
+
+  #  Node.js[42260]: void node::ResetStdio() at ../src/node.cc:766
+  #  Assertion failed: !(err != 0) || (err == -1 && (*__errno_location ()) == 1)
+
+----- Native stack trace -----
+
+ 1: 0xf6ea57 node::Assert(node::AssertionInfo const&) [node]
+ 2: 0xf13e24  [node]
+ 3: 0x7f4f91248271  [/lib/x86_64-linux-gnu/libc.so.6]
+ 4: 0x7f4f9124834e  [/lib/x86_64-linux-gnu/libc.so.6]
+ 5: 0xe6539f node::DefaultProcessExitHandlerInternal(node::Environment*, node::ExitCode) [node]
+ 6: 0xed1daf node::Environment::Exit(node::ExitCode) [node]
+ 7: 0x7f4f8a5cf5e2 
+
+  #  Node.js[42260]: void node::ResetStdio() at ../src/node.cc:766
+  #  Assertion failed: !(err != 0) || (err == -1 && (*__errno_location ()) == 1)
+
+----- Native stack trace -----
+
+ 1: 0xf6ea57 node::Assert(node::AssertionInfo const&) [node]
+ 2: 0xf13e24  [node]
+ 3: 0xf14542 node::TrapWebAssemblyOrContinue(int, siginfo_t*, void*) [node]
+ 4: 0x7f4f912458d0  [/lib/x86_64-linux-gnu/libc.so.6]
+ 5: 0x189e857 v8::internal::tracing::TraceEventHelper::GetTracingController() [node]
+ 6: 0x1351b65 v8::internal::Isolate::CaptureDetailedStackTrace(int, v8::StackTrace::StackTraceOptions) [node]
+ 7: 0x11df6b3 v8::StackTrace::CurrentStackTrace(v8::Isolate*, int, v8::StackTrace::StackTraceOptions) [node]
+ 8: 0xf6e9a6 node::GetCurrentStackTrace(v8::Isolate*, int) [node]
+ 9: 0xeaf02b node::DumpJavaScriptBacktrace(_IO_FILE*) [node]
+10: 0xf6ea63 node::Assert(node::AssertionInfo const&) [node]
+11: 0xf13e24  [node]
+12: 0x7f4f91248271  [/lib/x86_64-linux-gnu/libc.so.6]
+13: 0x7f4f9124834e  [/lib/x86_64-linux-gnu/libc.so.6]
+14: 0xe6539f node::DefaultProcessExitHandlerInternal(node::Environment*, node::ExitCode) [node]
+15: 0xed1daf node::Environment::Exit(node::ExitCode) [node]
+16: 0x7f4f8a5cf5e2 
