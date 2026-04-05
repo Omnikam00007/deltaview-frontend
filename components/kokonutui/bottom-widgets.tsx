@@ -71,9 +71,9 @@ export default function BottomWidgets() {
                             <p className="text-xs text-neutral">Data will refresh automatically</p>
                         </div>
                     ) : (
-                        indices.map((idx) => {
-                            const isPositive = idx.change >= 0
-                            const label = idx.symbol === "^INDIAVIX" ? (
+                        (Array.isArray(indices) ? indices : []).map((idx) => {
+                            const isPositive = (idx?.change ?? 0) >= 0
+                            const label = idx?.symbol === "^INDIAVIX" ? (
                                 <span className="font-semibold text-foreground tracking-tight flex items-center gap-2">
                                     {idx.name} <span className="text-[8px] border border-border-subtle px-1 py-0.5 bg-background text-neutral rounded font-mono">VOLATILITY</span>
                                 </span>
@@ -82,11 +82,11 @@ export default function BottomWidgets() {
                             )
 
                             return (
-                                <div key={idx.symbol} className="flex items-center justify-between p-2 rounded hover:bg-surface-hover cursor-pointer border border-transparent hover:border-border-subtle transition-colors">
+                                <div key={idx?.symbol || Math.random()} className="flex items-center justify-between p-2 rounded hover:bg-surface-hover cursor-pointer border border-transparent hover:border-border-subtle transition-colors">
                                     {label}
                                     <div className="flex items-center gap-3">
                                         <span className="font-mono font-bold text-foreground">
-                                            {idx.value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            {idx?.value?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) ?? 'N/A'}
                                         </span>
                                         <span className={`text-[10px] uppercase tracking-widest font-mono font-bold px-1.5 py-0.5 rounded flex items-center ${
                                             isPositive
@@ -94,7 +94,7 @@ export default function BottomWidgets() {
                                                 : 'text-loss-primary bg-loss-primary/10 border border-loss-primary/20'
                                         }`}>
                                             {isPositive ? <ArrowUpRight className="h-3 w-3 mr-0.5" /> : <ArrowDownRight className="h-3 w-3 mr-0.5" />}
-                                            {Math.abs(idx.change).toFixed(2)} ({Math.abs(idx.change_percent).toFixed(1)}%)
+                                            {Math.abs(idx?.change ?? 0).toFixed(2)} ({Math.abs(idx?.change_percent ?? 0).toFixed(1)}%)
                                         </span>
                                     </div>
                                 </div>
