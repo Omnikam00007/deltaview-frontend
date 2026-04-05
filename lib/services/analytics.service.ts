@@ -19,7 +19,7 @@ export const analyticsService = {
       }
     }
     const query = qs.toString() ? `?${qs.toString()}` : ""
-    return fetchApi<DailyPnl[]>(`/analytics/daily-pnl${query}`, { requireAuth: true })
+    return fetchApi<DailyPnl[]>(`/analytics/daily-pnl/${query}`, { requireAuth: true })
   },
 
   // Portfolio Snapshots
@@ -34,7 +34,7 @@ export const analyticsService = {
       }
     }
     const query = qs.toString() ? `?${qs.toString()}` : ""
-    return fetchApi<PortfolioSnapshot[]>(`/analytics/snapshots${query}`, { requireAuth: true })
+    return fetchApi<PortfolioSnapshot[]>(`/analytics/snapshots/${query}`, { requireAuth: true })
   },
 
   // Realized P&L
@@ -52,12 +52,12 @@ export const analyticsService = {
       }
     }
     const query = qs.toString() ? `?${qs.toString()}` : ""
-    return fetchApi<RealizedPnl[]>(`/analytics/realized-pnl${query}`, { requireAuth: true })
+    return fetchApi<RealizedPnl[]>(`/analytics/realized-pnl/${query}`, { requireAuth: true })
   },
 
   // Tax Summary
   async getTaxSummary(financial_year?: string): Promise<TaxSummary> {
     const qs = financial_year ? `?financial_year=${financial_year}` : ""
-    return fetchApi<TaxSummary>(`/analytics/tax-summary${qs}`, { requireAuth: true })
+    return fetchApi<TaxSummary>(`/analytics/tax-summary/${qs}`, { requireAuth: true })
   },
 }
