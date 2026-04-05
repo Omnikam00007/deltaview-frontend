@@ -4,7 +4,7 @@ import type { DailyPnl, PortfolioSnapshot, RealizedPnl, TaxSummary } from "../ty
 export const analyticsService = {
   // Dashboard Summary
   async getDashboardSummary(): Promise<any> {
-    return fetchApi<any>("/analytics/dashboard", { requireAuth: true })
+    return fetchApi<any>("/analytics/dashboard/", { requireAuth: true })
   },
   // Daily P&L
   async listDailyPnl(params?: {
