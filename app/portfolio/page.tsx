@@ -6,6 +6,7 @@ import PortfolioControls from "@/components/kokonutui/portfolio-controls"
 import HoldingsTable from "@/components/kokonutui/holdings-table"
 import PortfolioHeatmap from "@/components/kokonutui/portfolio-heatmap"
 import SectorExposureChart from "@/components/kokonutui/sector-exposure-chart"
+import TradesTable from "@/components/kokonutui/trades-table"
 
 export default function PortfolioPage() {
     const [searchQuery, setSearchQuery] = useState("")
@@ -42,6 +43,9 @@ export default function PortfolioPage() {
                     <PortfolioHeatmap />
                     <SectorExposureChart />
                 </div>
+                
+                {/* Trades Ledger */}
+                <TradesTable />
             </div>
         </div>
     )

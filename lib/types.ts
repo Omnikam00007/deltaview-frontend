@@ -129,7 +129,9 @@ export interface DailyPnl {
   id: string
   user_id: string
   trade_date: string
-  pnl: number
+  realized_pnl: number
+  unrealized_pnl: number
+  total_pnl: number
   trade_count: number
   segment: string
   created_at: string
@@ -142,6 +144,8 @@ export interface PortfolioSnapshot {
   snapshot_date: string
   total_value: number
   total_invested: number | null
+  total_realized_pnl: number | null
+  total_unrealized_pnl: number | null
   total_pnl: number | null
   cash_balance: number | null
   created_at: string

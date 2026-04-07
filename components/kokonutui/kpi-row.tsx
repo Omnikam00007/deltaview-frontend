@@ -5,20 +5,25 @@ import { LineChart as RechartsLineChart, Line, ResponsiveContainer } from "recha
 import { useState, useEffect } from "react"
 import { holdingsService } from "@/lib/services/holdings.service"
 import { fundsService } from "@/lib/services/funds.service"
-import type { PortfolioSummary, FundsBalance } from "@/lib/types"
+import { analyticsService } from "@/lib/services/analytics.service"
+import type { PortfolioSummary, FundsBalance, DailyPnl } from "@/lib/types"
 
 export default function KPIRow() {
   const [summary, setSummary] = useState<PortfolioSummary | null>(null)
   const [fundsBalances, setFundsBalances] = useState<FundsBalance[]>([])
+  const [dailyPnl, setDailyPnl] = useState<DailyPnl | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const today = new Date().toLocaleDateString('en-CA');
     Promise.all([
       holdingsService.getSummary().catch(() => null),
       fundsService.getBalances().catch(() => []),
-    ]).then(([s, f]) => {
+      analyticsService.listDailyPnl({ start_date: today, end_date: today }).catch(() => []),
+    ]).then(([s, f, d]) => {
       setSummary(s)
       setFundsBalances(f)
+      if (d && d.length > 0) setDailyPnl(d[0])
     }).finally(() => setLoading(false))
   }, [])
 
@@ -28,6 +33,9 @@ export default function KPIRow() {
   const totalMargin = fundsBalances.reduce((s, b) => s + b.total_margin, 0)
   const usedMargin = fundsBalances.reduce((s, b) => s + b.used_margin, 0)
   const marginPercent = totalMargin > 0 ? Math.round((usedMargin / totalMargin) * 100) : 0
+  
+  const todayPnL = dailyPnl?.total_pnl ?? (dailyPnl ? (dailyPnl.realized_pnl + (dailyPnl.unrealized_pnl ?? 0)) : 0)
+  const isTodayPositive = todayPnL >= 0
 
   const sparklineData = [
     { value: totalValue * 0.97 },
@@ -83,9 +91,13 @@ export default function KPIRow() {
           <TrendingUp className="h-4 w-4 text-profit/50" />
         </div>
         <div className="flex flex-col gap-1 flex-1">
-          <div className="text-2xl font-bold font-mono tracking-tight text-neutral">—</div>
+          <div className={`text-2xl font-bold font-mono tracking-tight ${isTodayPositive ? 'text-profit' : 'text-loss-primary'}`}>
+            {isTodayPositive ? '+' : ''}₹{Math.abs(todayPnL).toLocaleString('en-IN')}
+          </div>
           <div className="flex items-center gap-2 mt-auto">
-             <div className="text-[10px] text-neutral font-medium">Live data coming soon</div>
+             <div className="text-[10px] text-neutral font-medium uppercase tracking-widest">
+               {isTodayPositive ? 'Profitable Day' : 'Down Day'}
+             </div>
           </div>
         </div>
       </div>

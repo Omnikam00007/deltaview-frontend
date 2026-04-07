@@ -130,65 +130,11 @@ export default function Sidebar() {
             <NavItem href="/funds" icon={Wallet} badge={<Badge>₹65K</Badge>}>
               Funds
             </NavItem>
-            <NavItem href="#" icon={Activity}>
-              Analytics
-            </NavItem>
-          </div>
-
-          <div className="space-y-1">
-            <div className="px-3 mb-2 text-[11px] font-bold uppercase tracking-widest text-neutral/70 font-display">
-              Portfolio
-            </div>
-            <NavItem href="#" icon={Building2}>
-              Organization
-            </NavItem>
-            <NavItem href="#" icon={Folder}>
-              Projects
-            </NavItem>
-            <NavItem href="#" icon={Boxes}>
-              Holdings Groups
-            </NavItem>
-          </div>
-
-          <div className="space-y-1">
-            <div className="px-3 mb-2 text-[11px] font-bold uppercase tracking-widest text-neutral/70 font-display">
-              Transactions
-            </div>
-            <NavItem href="#" icon={CreditCard}>
-              Transactions
-            </NavItem>
-            <NavItem href="#" icon={Receipt}>
-              Invoices
-            </NavItem>
-            <NavItem href="#" icon={DollarSign}>
-              Payments
-            </NavItem>
-          </div>
-
-          <div className="space-y-1">
-            <div className="px-3 mb-2 text-[11px] font-bold uppercase tracking-widest text-neutral/70 font-display">
-              Collaboration
-            </div>
-            <NavItem href="#" icon={Users2} badge={<Badge variant="muted">3</Badge>}>
-              Team
-            </NavItem>
-            <NavItem href="#" icon={Shield}>
-              Permissions
-            </NavItem>
-            <NavItem href="#" icon={MessagesSquare} badge={<Badge variant="profit">2</Badge>}>
-              Chat
-            </NavItem>
-            <NavItem href="#" icon={Video}>
-              Meetings
-            </NavItem>
           </div>
         </div>
 
         <div className="px-3 py-4 border-t border-border-subtle bg-background/30">
           <div className="space-y-1">
-            <NavItem href="#" icon={ArrowUpRight}>
-              Upgrade Plan
-            </NavItem>
             <NavItem href="#" icon={HelpCircle}>
               Help & Support
             </NavItem>

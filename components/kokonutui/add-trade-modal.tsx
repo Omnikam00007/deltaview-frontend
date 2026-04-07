@@ -12,9 +12,10 @@ interface AddTradeModalProps {
     isOpen: boolean
     onClose: () => void
     onSuccess?: () => void
+    initialTrade?: any | null
 }
 
-export default function AddTradeModal({ isOpen, onClose, onSuccess }: AddTradeModalProps) {
+export default function AddTradeModal({ isOpen, onClose, onSuccess, initialTrade }: AddTradeModalProps) {
     const { toast } = useToast()
     const [brokerAccounts, setBrokerAccounts] = useState<BrokerAccount[]>([])
     const [loadingBrokers, setLoadingBrokers] = useState(true)
@@ -28,6 +29,8 @@ export default function AddTradeModal({ isOpen, onClose, onSuccess }: AddTradeMo
     const [quantity, setQuantity] = useState("")
     const [price, setPrice] = useState("")
     const [tradeDate, setTradeDate] = useState(new Date().toISOString().split("T")[0])
+    
+    const isEditing = !!initialTrade;
 
     const loadBrokerAccounts = () => {
         setLoadingBrokers(true)
@@ -45,12 +48,24 @@ export default function AddTradeModal({ isOpen, onClose, onSuccess }: AddTradeMo
     useEffect(() => {
         if (isOpen) {
             loadBrokerAccounts()
-            setSymbol("")
-            setQuantity("")
-            setPrice("")
+            if (initialTrade) {
+                setSymbol(initialTrade.instrument?.symbol || "")
+                setQuantity(initialTrade.quantity.toString())
+                setPrice(initialTrade.price.toString())
+                setTradeType(initialTrade.trade_type)
+                // If trade_date is YYYY-MM-DD
+                setTradeDate(initialTrade.trade_date.split("T")[0])
+                setSelectedBroker(initialTrade.broker_account_id || "")
+            } else {
+                setSymbol("")
+                setQuantity("")
+                setPrice("")
+                setTradeDate(new Date().toISOString().split("T")[0])
+                setTradeType("BUY")
+            }
             setError(null)
         }
-    }, [isOpen])
+    }, [isOpen, initialTrade])
 
     if (!isOpen) return null
 
@@ -72,30 +87,40 @@ export default function AddTradeModal({ isOpen, onClose, onSuccess }: AddTradeMo
         setError(null)
         try {
             // 1. Resolve Symbol to Instrument ID using the backend yfinance sync
-            const instrument = await instrumentsService.getBySymbol(symbol)
-            if (!instrument || !instrument.id) {
-                throw new Error(`Could not resolve symbol ${symbol}`)
+            let instrumentId = initialTrade?.instrument_id;
+            if (!isEditing || symbol !== initialTrade?.instrument?.symbol) {
+                const instrument = await instrumentsService.getBySymbol(symbol)
+                if (!instrument || !instrument.id) {
+                    throw new Error(`Could not resolve symbol ${symbol}`)
+                }
+                instrumentId = instrument.id;
             }
 
             // 2. Submit Trade
-            await tradesService.create({
+            const payload = {
                 broker_account_id: selectedBroker,
-                instrument_id: instrument.id,
+                instrument_id: instrumentId,
                 trade_type: tradeType,
                 quantity: qtyNum,
                 price: priceNum,
                 trade_value: qtyNum * priceNum,
                 trade_date: tradeDate,
-            })
+            }
+            
+            if (isEditing) {
+                await tradesService.update(initialTrade.id, initialTrade.version ?? 1, payload)
+            } else {
+                await tradesService.create(payload)
+            }
 
             toast({
-                title: "Trade Recorded",
-                description: `Successfully recorded ${tradeType} for ${symbol.toUpperCase()}.`,
+                title: isEditing ? "Trade Updated" : "Trade Recorded",
+                description: `Successfully ${isEditing ? 'updated' : 'recorded'} ${tradeType} for ${symbol.toUpperCase()}.`,
                 variant: "default",
             })
             showAndClose()
         } catch (e: any) {
-            setError(e.message || "Failed to record trade. Please try again.")
+            setError(e.message || `Failed to ${isEditing ? 'update' : 'record'} trade. Please try again.`)
         } finally {
             setSubmitting(false)
         }
@@ -115,7 +140,7 @@ export default function AddTradeModal({ isOpen, onClose, onSuccess }: AddTradeMo
                 <div className="flex items-center justify-between px-6 py-4 border-b border-border-subtle bg-surface/50">
                     <div className="flex items-center gap-2 text-foreground font-display font-bold">
                         <ArrowRightLeft className="w-4 h-4 text-primary" />
-                        Record Trade
+                        {isEditing ? "Edit Trade" : "Record Trade"}
                     </div>
                     <button onClick={onClose} className="p-2 -mr-2 text-neutral hover:text-foreground hover:bg-surface-hover rounded-full transition-colors">
                         <X className="w-4 h-4" />
@@ -249,7 +274,7 @@ export default function AddTradeModal({ isOpen, onClose, onSuccess }: AddTradeMo
                         {submitting ? (
                             <Loader2 className="w-5 h-5 animate-spin" />
                         ) : (
-                            <>Confirm {tradeType}</>
+                            <>{isEditing ? "Update" : "Confirm"} {tradeType}</>
                         )}
                     </button>
                     <p className="text-center text-[10px] text-neutral mt-4 italic">

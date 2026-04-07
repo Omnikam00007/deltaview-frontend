@@ -7,23 +7,40 @@ import type { DailyPnl as DailyPnlType } from "@/lib/types"
 
 interface DailyPnL {
     date: string
-    pnl: number
+    realized: number
+    unrealized: number
+    total: number
+    pnl: number // active display value
     trades: number
 }
+
+// Helper to format a UTC Date as YYYY-MM-DD
+const formatUTCDate = (date: Date): string => {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 export default function PnLCalendarHeatmap() {
     const [hoveredDay, setHoveredDay] = useState<DailyPnL | null>(null)
     const [loading, setLoading] = useState(true)
     const [rawData, setRawData] = useState<DailyPnlType[]>([])
+    const [showTotal, setShowTotal] = useState(false)
+
+    // Compute UTC today and 364 days ago
+    const now = new Date();
+    const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const startDateUTC = new Date(todayUTC);
+    startDateUTC.setUTCDate(todayUTC.getUTCDate() - 364);
 
     useEffect(() => {
-        const today = new Date()
-        const startDate = new Date(today)
-        startDate.setDate(startDate.getDate() - 364)
+        const startDateStr = formatUTCDate(startDateUTC)
+        const todayStr = formatUTCDate(todayUTC)
 
         analyticsService.listDailyPnl({
-            start_date: startDate.toISOString().split('T')[0],
-            end_date: today.toISOString().split('T')[0],
+            start_date: startDateStr,
+            end_date: todayStr,
         })
             .then(setRawData)
             .catch(() => setRawData([]))
@@ -33,24 +50,31 @@ export default function PnLCalendarHeatmap() {
     // Map API data into a lookup and fill 365-day grid
     const dailyData = useMemo<DailyPnL[]>(() => {
         const lookup = new Map<string, DailyPnL>()
-        rawData.forEach((entry) => {
-            lookup.set(entry.trade_date, {
-                date: entry.trade_date,
-                pnl: entry.pnl,
-                trades: entry.trade_count,
+        
+        const hasData = rawData.length > 0;
+        if (hasData) {
+            rawData.forEach((entry) => {
+                const totalMetric = entry.total_pnl ?? (entry.realized_pnl + (entry.unrealized_pnl ?? 0));
+                lookup.set(entry.trade_date, {
+                    date: entry.trade_date,
+                    realized: entry.realized_pnl ?? 0,
+                    unrealized: entry.unrealized_pnl ?? 0,
+                    total: totalMetric,
+                    pnl: showTotal ? totalMetric : (entry.realized_pnl ?? 0),
+                    trades: entry.trade_count ?? 0,
+                })
             })
-        })
+        }
 
         const data: DailyPnL[] = []
-        const today = new Date()
-        for (let i = 364; i >= 0; i--) {
-            const date = new Date(today)
-            date.setDate(date.getDate() - i)
-            const key = date.toISOString().split('T')[0]
-            data.push(lookup.get(key) || { date: key, pnl: 0, trades: 0 })
+        for (let i = 0; i <= 364; i++) {
+            const currentDate = new Date(startDateUTC);
+            currentDate.setUTCDate(startDateUTC.getUTCDate() + i);
+            const key = formatUTCDate(currentDate);
+            data.push(lookup.get(key) || { date: key, realized: 0, unrealized: 0, total: 0, pnl: 0, trades: 0 })
         }
         return data
-    }, [rawData])
+    }, [rawData, showTotal])
 
     // Get color intensity based on P&L
     const getColorClass = (pnl: number) => {
@@ -64,10 +88,10 @@ export default function PnLCalendarHeatmap() {
             if (absValue < 10000) return 'bg-profit opacity-80'
             return 'bg-profit'
         } else {
-            if (absValue < 1000) return 'bg-loss-primary opacity-30'
-            if (absValue < 5000) return 'bg-loss-primary opacity-50'
-            if (absValue < 10000) return 'bg-loss-primary opacity-80'
-            return 'bg-loss-primary'
+            if (absValue < 1000) return 'bg-loss opacity-30'
+            if (absValue < 5000) return 'bg-loss opacity-50'
+            if (absValue < 10000) return 'bg-loss opacity-80'
+            return 'bg-loss'
         }
     }
 
@@ -76,7 +100,8 @@ export default function PnLCalendarHeatmap() {
     let currentWeek: DailyPnL[] = []
 
     dailyData.forEach((day, index) => {
-        const dayOfWeek = new Date(day.date).getDay()
+        // String parse day.date is YYYY-MM-DD. new Date("YYYY-MM-DD").getUTCDay() gets correct day ignoring local timezone shift.
+        const dayOfWeek = new Date(day.date).getUTCDay()
 
         if (dayOfWeek === 0 && currentWeek.length > 0) {
             weeks.push(currentWeek)
@@ -98,10 +123,14 @@ export default function PnLCalendarHeatmap() {
         weeks.forEach((week, weekIndex) => {
             const firstDay = week[0]
             if (firstDay) {
-                const month = new Date(firstDay.date).getMonth()
+                const month = new Date(firstDay.date).getUTCMonth()
                 if (month !== lastMonth) {
+                    // Use a safe date string for Month format to prevent locale bugs.
+                    const safeDate = new Date(firstDay.date);
+                    // use getUTCMonth to explicitly map
+                    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
                     labels.push({
-                        month: new Date(firstDay.date).toLocaleDateString('en-US', { month: 'short' }),
+                        month: monthNames[month],
                         weekIndex
                     })
                     lastMonth = month
@@ -125,13 +154,15 @@ export default function PnLCalendarHeatmap() {
 
     return (
         <div className="bg-surface border border-border-subtle rounded-xl p-4 mb-6 flex flex-col h-[400px]">
-            <div className="mb-4">
-                <h3 className="text-[11px] uppercase tracking-widest font-display text-neutral mb-1">
-                    P&L Calendar Heatmap
-                </h3>
-                <p className="text-sm font-body text-neutral-primary">
-                    Daily profit/loss visualization - Spot patterns and streaks
-                </p>
+            <div className="flex justify-between items-start mb-4">
+                <div>
+                    <h3 className="text-[11px] uppercase tracking-widest font-display text-neutral mb-1">
+                        P&L Calendar Heatmap
+                    </h3>
+                    <p className="text-sm font-body text-neutral-primary cursor-pointer hover:text-white transition-colors" onClick={() => setShowTotal(!showTotal)}>
+                        Currently showing: <span className="underline decoration-dashed opacity-75 decoration-blue-500">{showTotal ? 'Total P&L (Realized + Unrealized)' : 'Realized P&L Only'}</span>
+                    </p>
+                </div>
             </div>
 
             {/* Heatmap Grid */}
@@ -143,7 +174,7 @@ export default function PnLCalendarHeatmap() {
                             <div
                                 key={index}
                                 className="text-[10px] uppercase font-bold text-neutral font-mono"
-                                style={{ marginLeft: index === 0 ? 0 : `${(label.weekIndex - (monthLabels[index - 1]?.weekIndex || 0)) * 14}px` }}
+                                style={{ marginLeft: index === 0 ? 0 : `${(label.weekIndex - (monthLabels[index - 1]?.weekIndex || 0)) * 16}px` }}
                             >
                                 {label.month}
                             </div>
@@ -167,7 +198,7 @@ export default function PnLCalendarHeatmap() {
                             {weeks.map((week, weekIndex) => (
                                 <div key={weekIndex} className="flex flex-col gap-1">
                                     {[0, 1, 2, 3, 4, 5, 6].map((dayIndex) => {
-                                        const day = week.find(d => new Date(d.date).getDay() === dayIndex)
+                                        const day = week.find(d => new Date(d.date).getUTCDay() === dayIndex)
 
                                         if (!day) {
                                             return <div key={dayIndex} className="w-3 h-3" />
@@ -203,10 +234,10 @@ export default function PnLCalendarHeatmap() {
                     <span>More profit</span>
                     <div className="mx-2 text-border-subtle">|</div>
                     <div className="flex gap-1">
-                        <div className="w-3 h-3 rounded-sm bg-loss-primary opacity-30" />
-                        <div className="w-3 h-3 rounded-sm bg-loss-primary opacity-50" />
-                        <div className="w-3 h-3 rounded-sm bg-loss-primary opacity-80" />
-                        <div className="w-3 h-3 rounded-sm bg-loss-primary" />
+                        <div className="w-3 h-3 rounded-sm bg-loss opacity-30" />
+                        <div className="w-3 h-3 rounded-sm bg-loss opacity-50" />
+                        <div className="w-3 h-3 rounded-sm bg-loss opacity-80" />
+                        <div className="w-3 h-3 rounded-sm bg-loss" />
                     </div>
                     <span>More loss</span>
                 </div>
@@ -215,16 +246,25 @@ export default function PnLCalendarHeatmap() {
                 {hoveredDay && (
                     <div className="bg-surface/95 backdrop-blur border border-border-subtle p-3 rounded-lg shadow-xl text-xs font-mono absolute right-0 bottom-full mb-2 min-w-[140px]">
                         <p className="text-neutral mb-2 border-b border-border-subtle pb-1">
-                            {new Date(hoveredDay.date).toLocaleDateString('en-IN', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric'
-                            })}
+                            {/* Parse the date splitting to avoid UTC midnight shifting backwards one day */}
+                            {hoveredDay.date.split('-').reverse().join('-')}
                         </p>
-                        <div className="flex justify-between items-center py-0.5 mt-1 border-t border-border-subtle pt-1 text-[10px]">
-                            <span className="text-neutral font-bold">{hoveredDay.trades} trades</span>
-                            <span className={`font-semibold ${hoveredDay.pnl >= 0 ? 'text-profit' : 'text-loss-primary'}`}>
-                                {hoveredDay.pnl >= 0 ? '+' : ''}₹{Math.abs(hoveredDay.pnl).toLocaleString('en-IN')}
+                        <div className="grid grid-cols-2 gap-x-6 gap-y-1 py-0.5 mt-1 border-t border-border-subtle pt-2 text-[10px]">
+                            <span className="text-neutral font-bold col-span-2 mb-1">{hoveredDay.trades} trades executed</span>
+                            
+                            <span className="text-neutral">Realized:</span>
+                            <span className={`font-semibold text-right ${hoveredDay.realized >= 0 ? 'text-profit' : 'text-loss'}`}>
+                                {hoveredDay.realized >= 0 ? '+' : ''}₹{Math.abs(hoveredDay.realized).toLocaleString('en-IN', {maximumFractionDigits: 0})}
+                            </span>
+                            
+                            <span className="text-neutral">Unrealized:</span>
+                            <span className={`font-semibold text-right ${hoveredDay.unrealized >= 0 ? 'text-profit' : 'text-loss'}`}>
+                                {hoveredDay.unrealized >= 0 ? '+' : ''}₹{Math.abs(hoveredDay.unrealized).toLocaleString('en-IN', {maximumFractionDigits: 0})}
+                            </span>
+                            
+                            <span className="text-white font-bold mt-1 pt-1 border-t border-border-subtle">Total PnL:</span>
+                            <span className={`font-bold text-right border-t border-border-subtle pt-1 mt-1 ${hoveredDay.total >= 0 ? 'text-profit' : 'text-loss'}`}>
+                                {hoveredDay.total >= 0 ? '+' : ''}₹{Math.abs(hoveredDay.total).toLocaleString('en-IN', {maximumFractionDigits: 0})}
                             </span>
                         </div>
                     </div>

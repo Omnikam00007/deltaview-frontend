@@ -46,4 +46,12 @@ export const tradesService = {
   async remove(id: string): Promise<void> {
     return fetchApi(`/trades/${id}`, { method: "DELETE", requireAuth: true })
   },
+
+  async update(id: string, version: number, data: any): Promise<Trade> {
+    return fetchApi<Trade>(`/trades/${id}?version=${version}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+      requireAuth: true,
+    })
+  },
 }

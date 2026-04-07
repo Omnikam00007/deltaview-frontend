@@ -3,26 +3,37 @@
 import { Eye, EyeOff, TrendingUp, TrendingDown, DollarSign, Calendar, Loader2 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { holdingsService } from "@/lib/services/holdings.service"
-import type { PortfolioSummary } from "@/lib/types"
+import { analyticsService } from "@/lib/services/analytics.service"
+import type { PortfolioSummary, DailyPnl } from "@/lib/types"
 
 export default function PortfolioVitalSigns() {
     const [privacyMode, setPrivacyMode] = useState(false)
     const [summary, setSummary] = useState<PortfolioSummary | null>(null)
+    const [dailyData, setDailyData] = useState<DailyPnl | null>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        holdingsService.getSummary()
-            .then(setSummary)
-            .catch(() => setSummary(null))
-            .finally(() => setLoading(false))
+        setLoading(true)
+        Promise.all([
+            holdingsService.getSummary().catch(() => null),
+            analyticsService.listDailyPnl({
+                start_date: new Date().toLocaleDateString('en-CA'),
+                end_date: new Date().toLocaleDateString('en-CA'),
+            }).catch(() => [])
+        ]).then(([summaryData, dailyPnlData]) => {
+            setSummary(summaryData)
+            if (dailyPnlData && dailyPnlData.length > 0) {
+                setDailyData(dailyPnlData[0])
+            }
+        }).finally(() => setLoading(false))
     }, [])
 
     const totalInvested = summary?.total_invested ?? 0
     const currentValue = summary?.current_value ?? 0
     const totalPnL = summary?.total_pnl ?? 0
-    const totalPnLPercent = summary?.total_pnl_percent?.toFixed(2) ?? "0.00"
-    const daysPnL = 0 // Will be computed from daily_pnl endpoint in future
-    const daysPnLPercent = 0
+    const totalPnLPercent = summary?.total_pnl_percent ?? 0
+    const daysPnL = dailyData?.total_pnl ?? (dailyData ? (dailyData.realized_pnl + (dailyData.unrealized_pnl ?? 0)) : 0)
+    const daysPnLPercent = totalInvested > 0 ? (daysPnL / totalInvested) * 100 : 0
     const xirr = 0 // Will be computed client-side or via a dedicated endpoint
 
     const isProfitable = totalPnL >= 0
@@ -109,7 +120,7 @@ export default function PortfolioVitalSigns() {
                         {isProfitable ? '+' : ''}{formatValue(Math.abs(totalPnL))}
                     </p>
                     <p className="text-xs font-body text-neutral-primary">
-                        {isProfitable ? '+' : ''}{formatPercent(totalPnLPercent)}
+                        {isProfitable ? '+' : ''}{formatPercent(totalPnLPercent.toFixed(2))}
                     </p>
                 </div>
 
