@@ -17,7 +17,7 @@ export default function PnLHeroMetrics() {
             .finally(() => setLoading(false))
     }, [])
 
-    const realizedPnL = data.reduce((s, d) => s + d.gross_pnl, 0)
+    const realizedPnL = data.reduce((s, d) => s + (d.gross_pnl ?? 0), 0)
     const totalCharges = data.reduce((s, d) => s + (d.charges_total ?? 0), 0)
     const chargeBreakdown = {
         brokerage: 0,
@@ -26,7 +26,7 @@ export default function PnLHeroMetrics() {
         stampDuty: 0,
         total: totalCharges,
     }
-    const netRealizedPnL = data.reduce((s, d) => s + d.net_pnl, 0)
+    const netRealizedPnL = data.reduce((s, d) => s + (d.net_pnl ?? 0), 0)
 
     const isProfitable = realizedPnL >= 0
     const isNetProfitable = netRealizedPnL >= 0

@@ -28,18 +28,18 @@ function mapToRow(r: RealizedPnl): TradeRow {
     return {
         id: r.id,
         symbol: r.instrument_id ? r.instrument_id.slice(0, 8).toUpperCase() : "UNKNOWN",
-        quantity: r.quantity,
+        quantity: r.quantity ?? 0,
         buyValue: (r.buy_price ?? 0) * (r.quantity ?? 1),
         sellValue: (r.sell_price ?? 0) * (r.quantity ?? 1),
-        grossPnL: r.gross_pnl,
+        grossPnL: r.gross_pnl ?? 0,
         charges: {
             brokerage: 0,
             stt: 0,
             gst: 0,
             stampDuty: 0,
-            total: r.charges_total,
+            total: r.charges_total ?? 0,
         },
-        netPnL: r.net_pnl,
+        netPnL: r.net_pnl ?? 0,
         holdingPeriod: r.holding_days ?? 0,
         taxCategory: r.tax_category ?? "—",
     }
