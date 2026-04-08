@@ -38,6 +38,9 @@ export const authService = {
     if (typeof window !== "undefined") {
       localStorage.setItem("deltaview_access_token", tokenResponse.access_token)
       localStorage.setItem("deltaview_refresh_token", tokenResponse.refresh_token)
+      // Sync to cookies for Next.js middleware
+      document.cookie = `deltaview_access_token=${tokenResponse.access_token}; path=/; max-age=86400; SameSite=Lax`
+      document.cookie = `deltaview_refresh_token=${tokenResponse.refresh_token}; path=/; max-age=604800; SameSite=Lax`
     }
   },
 
@@ -45,6 +48,9 @@ export const authService = {
     if (typeof window !== "undefined") {
       localStorage.removeItem("deltaview_access_token")
       localStorage.removeItem("deltaview_refresh_token")
+      // Clear cookies for Next.js middleware
+      document.cookie = "deltaview_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
+      document.cookie = "deltaview_refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
     }
   },
 

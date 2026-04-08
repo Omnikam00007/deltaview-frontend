@@ -246,7 +246,7 @@ export default function AccountValueCurve() {
                             {chartMode === "value" ? (
                                 <>
                                     {/* Benchmark Line (Invested Amount) */}
-                                    <Line yAxisId="left" type="monotone" dataKey="benchmark" stroke="var(--neutral-primary)" strokeWidth={2} dot={false} strokeDasharray="5 5" />
+                                    <Line yAxisId="left" type="monotone" dataKey="benchmark" stroke="var(--neutral-primary)" strokeWidth={2} dot={chartData.length === 1 ? { r: 3, fill: 'var(--neutral-primary)' } : false} strokeDasharray="5 5" />
                                     
                                     {/* Main Portfolio Area */}
                                     <Area
@@ -257,13 +257,14 @@ export default function AccountValueCurve() {
                                         strokeWidth={2}
                                         fill="url(#colorProfit)"
                                         activeDot={{ r: 4, strokeWidth: 0, fill: 'var(--profit-primary)' }}
+                                        dot={chartData.length === 1 ? { r: 4, fill: 'var(--profit-primary)', strokeWidth: 0 } : false}
                                     />
                                 </>
                             ) : (
                                 <>
                                     {/* Dual Line or Area for Breakdown */}
-                                    <Line yAxisId="left" type="monotone" dataKey="realized" stroke="#10b981" strokeWidth={2} dot={false} />
-                                    <Line yAxisId="left" type="monotone" dataKey="unrealized" stroke="#3b82f6" strokeWidth={2} dot={false} strokeDasharray="3 3"/>
+                                    <Line yAxisId="left" type="monotone" dataKey="realized" stroke="#10b981" strokeWidth={2} dot={chartData.length === 1 ? { r: 3, fill: '#10b981' } : false} />
+                                    <Line yAxisId="left" type="monotone" dataKey="unrealized" stroke="#3b82f6" strokeWidth={2} dot={chartData.length === 1 ? { r: 3, fill: '#3b82f6' } : false} strokeDasharray="3 3"/>
                                     <Area
                                         yAxisId="left"
                                         type="monotone"
@@ -272,6 +273,7 @@ export default function AccountValueCurve() {
                                         strokeWidth={2}
                                         fill="transparent"
                                         activeDot={{ r: 4, strokeWidth: 0, fill: 'var(--foreground)' }}
+                                        dot={chartData.length === 1 ? { r: 4, fill: 'var(--foreground)', strokeWidth: 0 } : false}
                                     />
                                 </>
                             )}

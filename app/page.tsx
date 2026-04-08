@@ -124,11 +124,10 @@ export default function LandingPage() {
                <div className="w-full h-[500px] md:h-[700px] relative rounded-b-xl overflow-hidden bg-[#0A0B10]">
                  {/* Overlay to prevent scrolling/interaction issues while acting as an image */}
                  <div className="absolute inset-0 z-10 pointer-events-none" />
-                 <iframe 
-                   src="/dashboard" 
-                   title="DeltaView Dashboard Live Mockup" 
-                   className="w-full h-full border-0"
-                   style={{ background: "#0A0B10" }}
+                 <img 
+                   src="/dashboard-screenshot.png" 
+                   alt="DeltaView Dashboard Live Mockup" 
+                   className="w-full h-full object-cover object-top border-0"
                  />
                </div>
             </div>
