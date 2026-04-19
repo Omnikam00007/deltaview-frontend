@@ -4,7 +4,7 @@ import type { DailyPnl, PortfolioSnapshot, RealizedPnl, TaxSummary } from "../ty
 export const analyticsService = {
   // Dashboard Summary
   async getDashboardSummary(): Promise<any> {
-    return fetchApi<any>("/analytics/dashboard/", { requireAuth: true })
+    return fetchApi<any>("/analytics/summary", { requireAuth: true })
   },
   // Daily P&L
   async listDailyPnl(params?: {
@@ -60,7 +60,7 @@ export const analyticsService = {
     const qs = financial_year ? `?financial_year=${financial_year}` : ""
     return fetchApi<TaxSummary>(`/analytics/tax-summary${qs}`, { requireAuth: true })
   },
-  
+
   // Backfill Snapshots
   async backfillSnapshots(startDate: string, endDate: string): Promise<any> {
     return fetchApi<any>("/analytics/snapshots/backfill", {

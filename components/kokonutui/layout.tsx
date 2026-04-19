@@ -5,6 +5,7 @@ import Sidebar from "./sidebar"
 import TopNav from "./top-nav"
 import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
+import { authService } from "@/lib/services/auth.service"
 
 interface LayoutProps {
   children: ReactNode
@@ -15,6 +16,11 @@ export default function Layout({ children }: LayoutProps) {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    // Client-side auth guard — defense-in-depth alongside middleware
+    if (!authService.isAuthenticated()) {
+      window.location.href = "/auth/login"
+      return
+    }
     setMounted(true)
   }, [])
 

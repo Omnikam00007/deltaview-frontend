@@ -19,7 +19,7 @@ export const tradesService = {
       }
     }
     const qs = params.toString() ? `?${params.toString()}` : ""
-    return fetchApi<Trade[]>(`/trades${qs}`, { requireAuth: true })
+    return fetchApi<Trade[]>(`/trades/${qs}`, { requireAuth: true })
   },
 
   async get(id: string): Promise<Trade> {
@@ -36,7 +36,7 @@ export const tradesService = {
     trade_date: string
     segment?: string
   }): Promise<Trade> {
-    return fetchApi<Trade>("/trades", {
+    return fetchApi<Trade>("/trades/", {
       method: "POST",
       body: JSON.stringify(data),
       requireAuth: true,

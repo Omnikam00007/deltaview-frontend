@@ -1,13 +1,35 @@
 "use client"
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import Image from "next/image"
-import { Bell, ChevronDown, ChevronRight, Settings } from "lucide-react"
+import { Bell, ChevronDown, Settings } from "lucide-react"
 import Profile01 from "./profile-01"
-import Link from "next/link"
 import { ThemeToggle } from "../theme-toggle"
+import { useState, useEffect } from "react"
+import { authService } from "@/lib/services/auth.service"
+
+function getInitials(name: string): string {
+  if (!name) return "?"
+  const parts = name.trim().split(/\s+/)
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+  }
+  return parts[0].substring(0, 2).toUpperCase()
+}
 
 export default function TopNav() {
+  const [userName, setUserName] = useState("")
+  const [userEmail, setUserEmail] = useState("")
+
+  useEffect(() => {
+    authService.getCurrentUser()
+      .then((user: any) => {
+        setUserName(user?.full_name || user?.email || "User")
+        setUserEmail(user?.email || "")
+      })
+      .catch(() => {})
+  }, [])
+
+  const initials = getInitials(userName)
 
   return (
     <nav className="flex flex-col w-full border-b border-border-subtle bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/60">
@@ -39,8 +61,8 @@ export default function TopNav() {
 
           <DropdownMenu>
             <DropdownMenuTrigger className="focus:outline-none flex items-center space-x-2">
-              <div className="h-7 w-7 rounded-sm bg-neutral flex items-center justify-center text-xs font-bold text-white shadow-sm ring-1 ring-border-subtle overflow-hidden">
-                RK
+              <div className="h-7 w-7 rounded-sm bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white shadow-sm ring-1 ring-border-subtle overflow-hidden">
+                {initials}
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent
@@ -48,7 +70,7 @@ export default function TopNav() {
               sideOffset={8}
               className="w-[280px] sm:w-80 bg-surface border-border-subtle rounded-lg shadow-xl"
             >
-              <Profile01 avatar="https://ferf1mheo22r9ira.public.blob.vercel-storage.com/avatar-01-n0x8HFv8EUetf9z6ht0wScJKoTHqf8.png" />
+              <Profile01 name={userName} role={userEmail} />
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -76,4 +98,3 @@ export default function TopNav() {
     </nav>
   )
 }
-

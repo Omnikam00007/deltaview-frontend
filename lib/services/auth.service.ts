@@ -36,19 +36,24 @@ export const authService = {
 
   setToken(tokenResponse: { access_token: string; refresh_token: string }) {
     if (typeof window !== "undefined") {
-      localStorage.setItem("deltaview_access_token", tokenResponse.access_token)
-      localStorage.setItem("deltaview_refresh_token", tokenResponse.refresh_token)
-      // Sync to cookies for Next.js middleware
-      document.cookie = `deltaview_access_token=${tokenResponse.access_token}; path=/; max-age=86400; SameSite=Lax`
-      document.cookie = `deltaview_refresh_token=${tokenResponse.refresh_token}; path=/; max-age=604800; SameSite=Lax`
+      // Use sessionStorage so tokens are wiped when the browser/tab is closed
+      sessionStorage.setItem("deltaview_access_token", tokenResponse.access_token)
+      sessionStorage.setItem("deltaview_refresh_token", tokenResponse.refresh_token)
+      // Sync to cookies for Next.js middleware — no max-age so they become session cookies
+      document.cookie = `deltaview_access_token=${tokenResponse.access_token}; path=/; SameSite=Lax`
+      document.cookie = `deltaview_refresh_token=${tokenResponse.refresh_token}; path=/; SameSite=Lax`
     }
   },
 
   clearTokens() {
     if (typeof window !== "undefined") {
+      // Clear sessionStorage
+      sessionStorage.removeItem("deltaview_access_token")
+      sessionStorage.removeItem("deltaview_refresh_token")
+      // Also clear legacy localStorage keys if they existed from before
       localStorage.removeItem("deltaview_access_token")
       localStorage.removeItem("deltaview_refresh_token")
-      // Clear cookies for Next.js middleware
+      // Expire cookies immediately
       document.cookie = "deltaview_access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
       document.cookie = "deltaview_refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
     }
@@ -56,7 +61,7 @@ export const authService = {
 
   isAuthenticated() {
     if (typeof window !== "undefined") {
-      return !!localStorage.getItem("deltaview_access_token")
+      return !!(sessionStorage.getItem("deltaview_access_token") || localStorage.getItem("deltaview_access_token"))
     }
     return false
   },

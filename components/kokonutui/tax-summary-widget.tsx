@@ -180,11 +180,7 @@ export default function TaxSummaryWidget() {
                 </p>
             </div>
 
-            {/* Download Tax Report Button */}
-            <button className="w-full mt-6 px-4 py-3 bg-foreground text-background rounded-lg font-medium text-sm transition-colors flex items-center justify-center gap-2 hover:opacity-90">
-                <FileText className="w-4 h-4" />
-                Download Tax Report
-            </button>
+
         </div>
     )
 }

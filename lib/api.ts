@@ -11,13 +11,13 @@ export async function fetchApi<T>(endpoint: string, options: FetchOptions = {}):
     reqHeaders.set("Content-Type", "application/json")
 
     if (requireAuth) {
-        const token = typeof window !== "undefined" ? localStorage.getItem("deltaview_access_token") : null
+        const token = typeof window !== "undefined" ? (sessionStorage.getItem("deltaview_access_token") || localStorage.getItem("deltaview_access_token")) : null
         if (token) {
             reqHeaders.set("Authorization", `Bearer ${token}`)
         }
     }
 
-    const config: RequestInit = {
+    const config: RequestInit = { cache: "no-store", 
         ...customOptions,
         headers: reqHeaders,
     }

@@ -3,7 +3,7 @@
 import { ArrowUpRight, ArrowDownRight, Loader2 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { holdingsService } from "@/lib/services/holdings.service"
-import type { Holding } from "@/lib/types"
+import type { ConsolidatedHolding } from "@/lib/types"
 
 interface SectorSlice {
     name: string
@@ -13,7 +13,7 @@ interface SectorSlice {
     isPositive: boolean
 }
 
-function deriveSectors(holdings: Holding[]): SectorSlice[] {
+function deriveSectors(holdings: ConsolidatedHolding[]): SectorSlice[] {
     if (!Array.isArray(holdings)) return []
     const groups: Record<string, number> = {}
 
@@ -42,7 +42,7 @@ export default function SectorExposureChart() {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        holdingsService.list()
+        holdingsService.listConsolidated()
             .then((holdings) => setSectors(deriveSectors(holdings)))
             .catch(() => setSectors([]))
             .finally(() => setLoading(false))

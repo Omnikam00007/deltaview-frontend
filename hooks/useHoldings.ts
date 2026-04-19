@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { holdingsService } from '@/lib/services/holdings.service';
-import { Holding } from '@/lib/types';
+import { ConsolidatedHolding } from '@/lib/types';
 import { useToast } from './use-toast';
 
-export function useHoldings(params?: { broker_account_id?: string; segment?: string }) {
-  const [holdings, setHoldings] = useState<Holding[]>([]);
+export function useHoldings() {
+  const [holdings, setHoldings] = useState<ConsolidatedHolding[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -12,7 +12,7 @@ export function useHoldings(params?: { broker_account_id?: string; segment?: str
   const fetchHoldings = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await holdingsService.list(params);
+      const data = await holdingsService.listConsolidated();
       setHoldings(data);
       setError(null);
     } catch (err: any) {
@@ -22,7 +22,7 @@ export function useHoldings(params?: { broker_account_id?: string; segment?: str
     } finally {
       setIsLoading(false);
     }
-  }, [params, toast]);
+  }, [toast]);
 
   const refreshPrices = useCallback(async () => {
     try {

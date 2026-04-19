@@ -4,7 +4,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts"
 import { ArrowUpRight, ArrowDownRight, Minus, Loader2 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { holdingsService } from "@/lib/services/holdings.service"
-import type { Holding } from "@/lib/types"
+import type { ConsolidatedHolding } from "@/lib/types"
 
 interface AllocationSlice {
     name: string
@@ -25,7 +25,7 @@ const SEGMENT_COLORS: Record<string, string> = {
     "Cash": "var(--neutral-primary)",
 }
 
-function deriveAllocation(holdings: Holding[]): AllocationSlice[] {
+function deriveAllocation(holdings: ConsolidatedHolding[]): AllocationSlice[] {
     if (!Array.isArray(holdings)) return []
     const groups: Record<string, { value: number; count: number }> = {}
 
@@ -58,7 +58,7 @@ export default function AssetAllocationDonut() {
     const [totalValue, setTotalValue] = useState(0)
 
     useEffect(() => {
-        holdingsService.list()
+        holdingsService.listConsolidated()
             .then((holdings) => {
                 const slices = deriveAllocation(holdings)
                 setData(slices)

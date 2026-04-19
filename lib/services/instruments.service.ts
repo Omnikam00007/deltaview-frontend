@@ -9,7 +9,7 @@ export const instrumentsService = {
         if (value) qs.set(key, value)
       }
     }
-    return fetchApi<Instrument[]>(`/instruments?${qs.toString()}`, { requireAuth: true })
+    return fetchApi<Instrument[]>(`/instruments/?${qs.toString()}`, { requireAuth: true })
   },
 
   async list(params?: { search?: string; exchange?: string; segment?: string; sector?: string }): Promise<Instrument[]> {
@@ -20,7 +20,7 @@ export const instrumentsService = {
       }
     }
     const query = qs.toString() ? `?${qs.toString()}` : ""
-    return fetchApi<Instrument[]>(`/instruments${query}`, { requireAuth: true })
+    return fetchApi<Instrument[]>(`/instruments/${query}`, { requireAuth: true })
   },
 
   async getBySymbol(symbol: string): Promise<Instrument> {
@@ -32,7 +32,7 @@ export const instrumentsService = {
   },
 
   async create(instrument: Partial<Instrument>): Promise<Instrument> {
-    return fetchApi<Instrument>("/instruments", {
+    return fetchApi<Instrument>("/instruments/", {
       method: "POST",
       body: JSON.stringify(instrument),
       requireAuth: true,

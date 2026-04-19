@@ -61,6 +61,25 @@ export interface PortfolioSummary {
   holding_count: number
 }
 
+// --------------- Consolidated Holding (aggregated by instrument) ---------------
+export interface ConsolidatedHolding {
+  id: string
+  user_id: string
+  instrument_id: string
+  quantity: number
+  avg_cost: number
+  ltp: number | null
+  current_value: number | null
+  pnl: number | null
+  pnl_percent: number | null
+  as_of_date: string | null
+  created_at: string | null
+  updated_at: string | null
+  instrument?: Instrument | null
+  brokers: BrokerAccountBrief[]
+}
+
+
 export interface HoldingTag {
   id: string
   user_id: string

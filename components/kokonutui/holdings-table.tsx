@@ -1,10 +1,10 @@
 "use client"
 
 import { ChevronDown, ChevronUp, ArrowUpDown, MoreVertical, RefreshCw, Download, Loader2, Plus } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, Fragment } from "react"
 import HoldingDetailsExpansion from "@/components/kokonutui/holding-details-expansion"
 import AddTradeModal from "@/components/kokonutui/add-trade-modal"
-import type { Holding as HoldingType } from "@/lib/types"
+import type { ConsolidatedHolding } from "@/lib/types"
 import { useHoldings } from "@/hooks/useHoldings"
 
 // Local UI type extending backend data
@@ -37,13 +37,21 @@ const generateSparkline = (start: number, end: number) => {
     return data
 }
 
-function mapHoldingToRow(h: HoldingType, totalValue: number): HoldingRow {
+function mapHoldingToRow(h: ConsolidatedHolding, totalValue: number): HoldingRow {
     const qty = h?.quantity ?? 0
     const avg = h?.avg_cost ?? 0
     const ltp = h?.ltp ?? avg
     const cv = h?.current_value ?? qty * ltp
     const pnl = h?.pnl ?? cv - qty * avg
     const pnlPct = h?.pnl_percent ?? (qty * avg > 0 ? (pnl / (qty * avg)) * 100 : 0)
+
+    // Extract broker names from the consolidated brokers array
+    const brokerNames = (h?.brokers ?? []).map(b => b.broker)
+    const brokerBreakdown = (h?.brokers ?? []).map(b => ({
+        broker: b.broker,
+        qty: qty, // consolidated — single row per stock
+        avgCost: avg,
+    }))
 
     return {
         id: h?.id ?? `unknown-${Math.random()}`,
@@ -57,11 +65,9 @@ function mapHoldingToRow(h: HoldingType, totalValue: number): HoldingRow {
         pnlPercent: pnlPct,
         dayChangePercent: 0, // Will come from live price feed
         allocation: totalValue > 0 ? (cv / totalValue) * 100 : 0,
-        brokers: h?.broker_account?.broker ? [h.broker_account.broker] : [],
-        brokerBreakdown: h?.broker_account?.broker
-            ? [{ broker: h.broker_account.broker, qty, avgCost: avg }]
-            : [],
-        isin: h?.instrument?.isin ?? "",
+        brokers: brokerNames,
+        brokerBreakdown,
+        isin: "",
         sparkline: generateSparkline(avg, ltp),
     }
 }
@@ -232,9 +238,8 @@ export default function HoldingsTable() {
                             const isDayProfit = holding.dayChangePercent >= 0
 
                             return (
-                                <>
+                                <Fragment key={holding.id}>
                                     <tr
-                                        key={holding.id}
                                         className="hover:bg-surface-hover/50 transition-colors group cursor-pointer"
                                         onClick={() => setExpandedRow(expandedRow === holding.id ? null : holding.id)}
                                     >
@@ -305,7 +310,7 @@ export default function HoldingsTable() {
                                             </td>
                                         </tr>
                                     )}
-                                </>
+                                </Fragment>
                             )
                         })}
                     </tbody>

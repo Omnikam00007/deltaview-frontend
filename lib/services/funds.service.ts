@@ -4,11 +4,11 @@ import type { FundsBalance, LedgerEntry, FundTransaction, FundTransactionCreate,
 export const fundsService = {
   // Funds Balance
   async getBalances(): Promise<FundsBalance[]> {
-    return fetchApi<FundsBalance[]>("/funds-balance", { requireAuth: true })
+    return fetchApi<FundsBalance[]>("/funds-balance/", { requireAuth: true })
   },
 
   async syncBalance(data: Record<string, any>): Promise<FundsBalance> {
-    return fetchApi<FundsBalance>("/funds-balance", {
+    return fetchApi<FundsBalance>("/funds-balance/", {
       method: "PUT",
       body: JSON.stringify(data),
       requireAuth: true,
@@ -29,11 +29,11 @@ export const fundsService = {
       }
     }
     const query = qs.toString() ? `?${qs.toString()}` : ""
-    return fetchApi<LedgerEntry[]>(`/ledger-entries${query}`, { requireAuth: true })
+    return fetchApi<LedgerEntry[]>(`/ledger-entries/${query}`, { requireAuth: true })
   },
 
   async createLedgerEntry(data: Record<string, any>): Promise<LedgerEntry> {
-    return fetchApi<LedgerEntry>("/ledger-entries", {
+    return fetchApi<LedgerEntry>("/ledger-entries/", {
       method: "POST",
       body: JSON.stringify(data),
       requireAuth: true,

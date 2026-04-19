@@ -1,5 +1,5 @@
 import { fetchApi } from "../api"
-import type { Holding, PortfolioSummary, HoldingTag } from "../types"
+import type { Holding, ConsolidatedHolding, PortfolioSummary, HoldingTag } from "../types"
 
 export const holdingsService = {
   async list(params?: { broker_account_id?: string; segment?: string }): Promise<Holding[]> {
@@ -10,7 +10,11 @@ export const holdingsService = {
       }
     }
     const query = qs.toString() ? `?${qs.toString()}` : ""
-    return fetchApi<Holding[]>(`/holdings${query}`, { requireAuth: true })
+    return fetchApi<Holding[]>(`/holdings/${query}`, { requireAuth: true })
+  },
+
+  async listConsolidated(): Promise<ConsolidatedHolding[]> {
+    return fetchApi<ConsolidatedHolding[]>("/holdings/?consolidated=true", { requireAuth: true })
   },
 
   async syncHoldings(holdings: any[]): Promise<void> {
@@ -34,7 +38,7 @@ export const holdingsService = {
   },
 
   async create(data: Record<string, any>): Promise<Holding> {
-    return fetchApi<Holding>("/holdings", {
+    return fetchApi<Holding>("/holdings/", {
       method: "POST",
       body: JSON.stringify(data),
       requireAuth: true,

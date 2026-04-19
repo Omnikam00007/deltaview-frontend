@@ -4,7 +4,7 @@ import { Treemap, ResponsiveContainer, Tooltip } from "recharts"
 import { useState, useEffect } from "react"
 import { Loader2 } from "lucide-react"
 import { holdingsService } from "@/lib/services/holdings.service"
-import type { Holding } from "@/lib/types"
+import type { ConsolidatedHolding } from "@/lib/types"
 
 interface HeatmapTile {
     name: string
@@ -13,7 +13,7 @@ interface HeatmapTile {
     color: string
 }
 
-function deriveHeatmap(holdings: Holding[]): HeatmapTile[] {
+function deriveHeatmap(holdings: ConsolidatedHolding[]): HeatmapTile[] {
     if (!Array.isArray(holdings)) return []
     return holdings.map((h) => {
         const cv = h?.current_value ?? (h?.quantity ?? 0) * (h?.ltp ?? h?.avg_cost ?? 0)
@@ -32,7 +32,8 @@ const CustomizedContent = (props: any) => {
 
     if (width < 60 || height < 40) return null
     
-    const intensity = Math.min(Math.abs(change) / 5, 1) * 0.5 + 0.5
+    const safeChange = Number.isFinite(change) ? change : 0
+    const intensity = Math.min(Math.abs(safeChange) / 5, 1) * 0.5 + 0.5
 
     return (
         <g>
@@ -90,7 +91,7 @@ export default function PortfolioHeatmap() {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        holdingsService.list()
+        holdingsService.listConsolidated()
             .then((holdings) => setTiles(deriveHeatmap(holdings)))
             .catch(() => setTiles([]))
             .finally(() => setLoading(false))
