@@ -1,4 +1,4 @@
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.deltaview.live/api/v1"
 
 interface FetchOptions extends RequestInit {
     requireAuth?: boolean
