@@ -15,6 +15,20 @@ export const authService = {
     })
   },
 
+  async verifyEmail(data: { email: string; otp: string }) {
+    return fetchApi("/auth/verify-email", {
+      method: "POST",
+      body: JSON.stringify(data),
+    })
+  },
+
+  async resendVerifyEmail(email: string) {
+    return fetchApi("/auth/resend-verify-email", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    })
+  },
+
   async logout() {
     try {
       await fetchApi("/auth/logout", {

@@ -1,7 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import Link from "next/link"
+import { useSearchParams, useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { TrendingUp, ArrowRight, AlertCircle, CheckCircle2 } from "lucide-react"
 import {
@@ -10,35 +11,64 @@ import {
     InputOTPSeparator,
     InputOTPSlot,
 } from "@/components/ui/input-otp"
+import { authService } from "@/lib/services/auth.service"
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
+    const searchParams = useSearchParams()
+    const router = useRouter()
+    
+    // Assumed email from query params
+    const email = searchParams.get("email") || ""
+
     const [value, setValue] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState("")
     const [success, setSuccess] = useState(false)
-
-    // Assumed email from context or query params
-    const email = "you@example.com"
+    const [resendStatus, setResendStatus] = useState("")
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError("")
+        setResendStatus("")
 
         if (value.length !== 6) {
             setError("Please enter the complete 6-digit code.")
             return
         }
 
+        if (!email) {
+            setError("Missing email address. Please start the registration process again.")
+            return
+        }
+
         setIsLoading(true)
-        await new Promise((r) => setTimeout(r, 1500))
-        setIsLoading(false)
-        setSuccess(true)
+        try {
+            const data: any = await authService.verifyEmail({ email, otp: value })
+            authService.setToken(data)
+            setSuccess(true)
+            setTimeout(() => {
+                router.push("/dashboard")
+            }, 2000)
+        } catch (err: any) {
+            setError(err.message || "Invalid or expired verification code.")
+        } finally {
+            setIsLoading(false)
+        }
     }
 
-    const handleResend = () => {
-        // Logic to resend code
+    const handleResend = async () => {
         setError("")
-        // Example feedback: setError("A new code has been sent.")
+        setResendStatus("")
+        if (!email) {
+            setError("Missing email address.")
+            return
+        }
+        try {
+            await authService.resendVerifyEmail(email)
+            setResendStatus("A new verification code has been sent.")
+        } catch (err: any) {
+            setError(err.message || "Failed to resend code.")
+        }
     }
 
     const containerVariants = {
@@ -203,6 +233,19 @@ export default function VerifyEmailPage() {
                         </motion.button>
                     </form>
 
+                    <AnimatePresence>
+                        {resendStatus && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                                animate={{ opacity: 1, height: "auto", marginTop: 16 }}
+                                exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                                className="overflow-hidden text-center"
+                            >
+                                <p className="text-sm text-green-600 dark:text-green-400">{resendStatus}</p>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
                     <motion.div variants={itemVariants} className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
                         Didn't receive the code?{" "}
                         <button
@@ -216,5 +259,13 @@ export default function VerifyEmailPage() {
                 </motion.div>
             </motion.div>
         </div>
+    )
+}
+
+export default function VerifyEmailPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-white dark:bg-[#0F0F12]" />}>
+            <VerifyEmailContent />
+        </Suspense>
     )
 }

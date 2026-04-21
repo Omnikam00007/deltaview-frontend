@@ -114,7 +114,7 @@ export default function RegisterPage() {
                         Verify your email to start tracking your portfolio.
                     </p>
                     <Link
-                        href="/auth/verify-email"
+                        href={`/auth/verify-email?email=${encodeURIComponent(form.email)}`}
                         className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg shadow-lg shadow-blue-500/20 hover:opacity-90 transition-opacity"
                     >
                         Verify Email <ArrowRight className="w-4 h-4" />

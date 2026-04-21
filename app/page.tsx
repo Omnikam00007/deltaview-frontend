@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
+import dashboardMockup from "../public/dashboard-screenshot.png"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { 
   ArrowRight, ShieldCheck, TrendingUp, PieChart, Activity, 
@@ -124,10 +126,11 @@ export default function LandingPage() {
                <div className="w-full h-[500px] md:h-[700px] relative rounded-b-xl overflow-hidden bg-[#0A0B10]">
                  {/* Overlay to prevent scrolling/interaction issues while acting as an image */}
                  <div className="absolute inset-0 z-10 pointer-events-none" />
-                 <img 
-                   src="/dashboard-screenshot.png" 
+                 <Image 
+                   src={dashboardMockup}
                    alt="DeltaView Dashboard Live Mockup" 
                    className="w-full h-full object-cover object-top border-0"
+                   priority
                  />
                </div>
             </div>
